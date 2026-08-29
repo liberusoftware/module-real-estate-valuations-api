@@ -131,4 +131,16 @@ final class ValuationController
             (int) ($data['training_samples'] ?? 0),
         )))->response();
     }
+
+    public function calculateMortgage(Request $request, CalculateMortgage $calculate): JsonResponse
+    {
+        $data = $request->validate([
+            'property_price' => ['required', 'numeric', 'gt:0'],
+            'loan_amount' => ['required', 'numeric', 'gt:0', 'lte:property_price'],
+            'interest_rate' => ['required', 'numeric', 'between:0,100'],
+            'loan_term_years' => ['required', 'integer', 'between:1,50'],
+        ]);
+
+        return (new ValuationCalculationResource($calculate->handle((float) $data['property_price'], (float) $data['loan_amount'], (float) $data['interest_rate'], (int) $data['loan_term_years'])))->response();
+    }
 }
