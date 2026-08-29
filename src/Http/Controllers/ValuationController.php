@@ -8,6 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Liberu\RealEstate\Valuations\Application\CalculateComparables;
+use Liberu\RealEstate\Valuations\Application\CalculateMortgage;
+use Liberu\RealEstate\Valuations\Application\CalculateRentalYield;
 use Liberu\RealEstate\Valuations\Application\CalculateHomeValuation;
 use Liberu\RealEstate\Valuations\Application\CompleteValuation;
 use Liberu\RealEstate\Valuations\Application\ConvertValuation;
@@ -142,5 +144,11 @@ final class ValuationController
         ]);
 
         return (new ValuationCalculationResource($calculate->handle((float) $data['property_price'], (float) $data['loan_amount'], (float) $data['interest_rate'], (int) $data['loan_term_years'])))->response();
+    }
+
+    public function calculateRentalYield(Request $request, CalculateRentalYield $calculate): JsonResponse
+    {
+        $data = $request->validate(['property_value' => ['required', 'numeric', 'gt:0'], 'annual_rental_income' => ['required', 'numeric', 'min:0'], 'annual_expenses' => ['sometimes', 'numeric', 'min:0']]);
+        return (new ValuationCalculationResource($calculate->handle((float) $data['property_value'], (float) $data['annual_rental_income'], (float) ($data['annual_expenses'] ?? 0))))->response();
     }
 }
